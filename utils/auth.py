@@ -19,3 +19,16 @@ def signup_user(full_name, email, password):
 
     except Exception as e:
         raise Exception(str(e))
+
+
+def login_user(email, password):
+    try:
+        response = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
+
+        return response
+
+    except Exception as e:
+        raise Exception(str(e))
