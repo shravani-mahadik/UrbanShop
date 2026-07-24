@@ -119,3 +119,68 @@ def get_user_wishlist(user_id):
     except Exception as e:
         print("Wishlist Error:", e)
         return []
+
+# ==============================
+# CART
+# ==============================
+
+def add_to_cart(user_id, product_id):
+    """Add product to cart or increase quantity if it already exists."""
+    try:
+        existing = (
+            supabase
+            .table("cart")
+            .select("*")
+            .eq("user_id", user_id)
+            .eq("product_id", product_id)
+            .execute()
+        )
+
+        if existing.data:
+            item = existing.data[0]
+
+            supabase.table("cart").update({
+                "quantity": item["quantity"] + 1
+            }).eq("id", item["id"]).execute()
+
+        else:
+            supabase.table("cart").insert({
+                "user_id": user_id,
+                "product_id": product_id,
+                "quantity": 1
+            }).execute()
+
+        return True
+
+    except Exception as e:
+        print("Cart Error:", e)
+        return False
+
+
+def get_user_cart(user_id):
+    """Fetch all cart items for a user."""
+    try:
+        response = (
+            supabase
+            .table("cart")
+            .select("*")
+            .eq("user_id", user_id)
+            .execute()
+        )
+
+        return response.data
+
+    except Exception as e:
+        print("Cart Error:", e)
+        return []
+
+
+def remove_from_cart(cart_id):
+    """Remove an item from the cart."""
+    try:
+        supabase.table("cart").delete().eq("id", cart_id).execute()
+        return True
+
+    except Exception as e:
+        print("Cart Error:", e)
+        return False

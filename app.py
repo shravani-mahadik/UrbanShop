@@ -11,11 +11,11 @@ st.title("🛍️ UrbanShop")
 st.write("Welcome to UrbanShop")
 
 st.page_link(
-    "pages/3_Signup.py",
+    "pages/2_Signup.py",
     label="Create Account"
 )
 
 st.page_link(
-    "pages/2_Login.py",
+    "pages/1_Login.py",
     label="Login"
 )

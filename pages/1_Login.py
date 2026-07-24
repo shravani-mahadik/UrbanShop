@@ -17,7 +17,7 @@ if st.button("Login"):
             st.session_state["user"] = response.user
             st.success("Login successful! 🎉")
 
-            st.switch_page("pages/1_Home.py")
+            st.switch_page("pages/3_Home.py")
 
         else:
             st.error("Invalid email or password.")

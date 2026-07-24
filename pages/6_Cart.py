@@ -5,8 +5,8 @@ from database.supabase import supabase
 # Page Configuration
 # -----------------------------
 st.set_page_config(
-    page_title="Wishlist",
-    page_icon="❤️",
+    page_title="My Cart",
+    page_icon="🛒",
     layout="wide"
 )
 
@@ -31,28 +31,26 @@ if st.sidebar.button("🚪 Logout"):
     st.switch_page("pages/1_Login.py")
 
 # -----------------------------
-# Wishlist Page
+# Cart Page
 # -----------------------------
-st.title("❤️ My Wishlist")
+st.title("🛒 My Cart")
+
+total = 0
 
 try:
-    # Get wishlist items
-    wishlist = (
-        supabase
-        .table("wishlist")
+    cart = (
+        supabase.table("cart")
         .select("*")
         .eq("user_id", user.id)
         .execute()
     )
 
-    if wishlist.data:
+    if cart.data:
 
-        for item in wishlist.data:
+        for item in cart.data:
 
-            # Get product details
             product = (
-                supabase
-                .table("products")
+                supabase.table("products")
                 .select("*")
                 .eq("id", item["product_id"])
                 .single()
@@ -61,28 +59,38 @@ try:
 
             p = product.data
 
+            subtotal = p["price"] * item["quantity"]
+            total += subtotal
+
             with st.container():
 
                 st.subheader(p["title"])
                 st.write(p["description"])
 
-                st.write(f"💰 **Price:** ₹{p['price']}")
-                st.write(f"📍 **Location:** {p['location']}")
+                st.write(f"💰 Price: ₹{p['price']}")
+                st.write(f"📦 Quantity: {item['quantity']}")
+                st.write(f"💵 Subtotal: ₹{subtotal}")
 
                 if st.button("❌ Remove", key=f"remove_{item['id']}"):
 
-                    supabase.table("wishlist") \
-                        .delete() \
-                        .eq("id", item["id"]) \
+                    supabase.table("cart")\
+                        .delete()\
+                        .eq("id", item["id"])\
                         .execute()
 
-                    st.success("Removed from Wishlist ❤️")
+                    st.success("Removed from Cart")
                     st.rerun()
 
                 st.divider()
 
+        st.markdown("## -------------------------")
+        st.markdown(f"## 💰 Total : ₹{total}")
+
+        if st.button("Proceed to Checkout"):
+            st.success("Checkout feature coming soon...")
+
     else:
-        st.info("Your wishlist is empty.")
+        st.info("Your cart is empty.")
 
 except Exception as e:
-    st.error(f"Error: {e}")
+    st.error(e)
