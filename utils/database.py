@@ -5,7 +5,6 @@ from database.supabase import supabase
 # ==============================
 
 def get_products():
-    """Fetch all products."""
     try:
         response = (
             supabase
@@ -19,7 +18,6 @@ def get_products():
     except Exception as e:
         print("Error fetching products:", e)
         return []
-
 
 def get_product_by_id(product_id):
     """Fetch a single product."""
