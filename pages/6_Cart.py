@@ -71,26 +71,35 @@ try:
                 st.write(f"📦 Quantity: {item['quantity']}")
                 st.write(f"💵 Subtotal: ₹{subtotal}")
 
-                if st.button("❌ Remove", key=f"remove_{item['id']}"):
+                if st.button(
+                    "❌ Remove",
+                    key=f"remove_{item['id']}"
+                ):
 
-                    supabase.table("cart")\
-                        .delete()\
-                        .eq("id", item["id"])\
+                    (
+                        supabase.table("cart")
+                        .delete()
+                        .eq("id", item["id"])
                         .execute()
+                    )
 
                     st.success("Removed from Cart")
                     st.rerun()
 
                 st.divider()
 
-        st.markdown("## -------------------------")
-        st.markdown(f"## 💰 Total : ₹{total}")
+        st.markdown("---")
+        st.markdown(f"## 💰 Total: ₹{total:,}")
 
-        if st.button("Proceed to Checkout"):
-            st.success("Checkout feature coming soon...")
+        if st.button(
+            "🛒 Proceed to Checkout",
+            key="checkout_button",
+            use_container_width=True
+        ):
+            st.switch_page("pages/9_Checkout.py")
 
     else:
-        st.info("Your cart is empty.")
+        st.info("🛒 Your cart is empty.")
 
 except Exception as e:
-    st.error(e)
+    st.error(f"Error: {e}")

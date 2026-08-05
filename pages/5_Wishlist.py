@@ -1,5 +1,6 @@
 import streamlit as st
 from database.supabase import supabase
+from utils.database import add_to_cart
 
 # -----------------------------
 # Page Configuration
@@ -36,7 +37,6 @@ if st.sidebar.button("🚪 Logout"):
 st.title("❤️ My Wishlist")
 
 try:
-    # Get wishlist items
     wishlist = (
         supabase
         .table("wishlist")
@@ -49,7 +49,6 @@ try:
 
         for item in wishlist.data:
 
-            # Get product details
             product = (
                 supabase
                 .table("products")
@@ -66,23 +65,64 @@ try:
                 st.subheader(p["title"])
                 st.write(p["description"])
 
-                st.write(f"💰 **Price:** ₹{p['price']}")
+                st.write(f"💰 **Price:** ₹{p['price']:,}")
                 st.write(f"📍 **Location:** {p['location']}")
 
-                if st.button("❌ Remove", key=f"remove_{item['id']}"):
+                # -----------------------------
+                # Buttons
+                # -----------------------------
+                col1, col2 = st.columns(2)
 
-                    supabase.table("wishlist") \
-                        .delete() \
-                        .eq("id", item["id"]) \
-                        .execute()
+                # Add to Cart
+                with col1:
+                    if st.button(
+                        "🛒 Add to Cart",
+                        key=f"cart_{item['id']}",
+                        use_container_width=True
+                    ):
 
-                    st.success("Removed from Wishlist ❤️")
-                    st.rerun()
+                        success = add_to_cart(
+                            user.id,
+                            item["product_id"]
+                        )
+
+                        if success:
+                            (
+                                supabase
+                                .table("wishlist")
+                                .delete()
+                                .eq("id", item["id"])
+                                .execute()
+                            )
+
+                            st.success("Product moved to Cart 🛒")
+                            st.rerun()
+                        else:
+                            st.error("Failed to add product to cart.")
+
+                # Remove from Wishlist
+                with col2:
+                    if st.button(
+                        "❌ Remove",
+                        key=f"remove_{item['id']}",
+                        use_container_width=True
+                    ):
+
+                        (
+                            supabase
+                            .table("wishlist")
+                            .delete()
+                            .eq("id", item["id"])
+                            .execute()
+                        )
+
+                        st.success("Removed from Wishlist ❤️")
+                        st.rerun()
 
                 st.divider()
 
     else:
-        st.info("Your wishlist is empty.")
+        st.info("❤️ Your wishlist is empty.")
 
 except Exception as e:
     st.error(f"Error: {e}")

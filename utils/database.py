@@ -60,6 +60,22 @@ def get_profile(user_id):
         print("Error fetching profile:", e)
         return None
 
+def update_profile(user_id, profile_data):
+    try:
+        response = (
+            supabase
+            .table("profiles")
+            .update(profile_data)
+            .eq("id", user_id)
+            .execute()
+        )
+
+        return response.data
+
+    except Exception as e:
+        print(e)
+        return None
+
 
 # ==============================
 # WISHLIST
@@ -156,12 +172,24 @@ def add_to_cart(user_id, product_id):
 
 
 def get_user_cart(user_id):
-    """Fetch all cart items for a user."""
+    """Fetch all cart items with product details."""
     try:
         response = (
             supabase
             .table("cart")
-            .select("*")
+            .select("""
+                id,
+                quantity,
+                product_id,
+                products (
+                    id,
+                    title,
+                    description,
+                    price,
+                    location,
+                    images
+                )
+            """)
             .eq("user_id", user_id)
             .execute()
         )
@@ -181,4 +209,60 @@ def remove_from_cart(cart_id):
 
     except Exception as e:
         print("Cart Error:", e)
+        return False
+
+def place_order(order_data):
+    try:
+        response = (
+            supabase
+            .table("orders")
+            .insert(order_data)
+            .execute()
+        )
+
+        return response.data
+
+    except Exception as e:
+        print("Error placing order:", e)
+        return None
+
+def get_user_orders(user_id):
+    try:
+        response = (
+            supabase
+            .table("orders")
+            .select("""
+                *,
+                products (
+                    title,
+                    price,
+                    images
+                )
+            """)
+            .eq("user_id", user_id)
+            .order("ordered_at", desc=True)
+            .execute()
+        )
+
+        return response.data
+
+    except Exception as e:
+        print("Error fetching orders:", e)
+        return []
+       
+
+def clear_cart(user_id):
+    try:
+        (
+            supabase
+            .table("cart")
+            .delete()
+            .eq("user_id", user_id)
+            .execute()
+        )
+
+        return True
+
+    except Exception as e:
+        print("Error clearing cart:", e)
         return False
